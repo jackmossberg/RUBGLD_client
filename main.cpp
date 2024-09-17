@@ -1,5 +1,7 @@
 #include<iostream>
 
+#include"opengl.h"
+
 int main() {
-	return 0;
+	opengl::free();
 }

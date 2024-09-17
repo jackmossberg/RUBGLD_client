@@ -1,0 +1,8 @@
+﻿  main.cpp
+  opengl.cpp
+C:\Users\mrdia\OneDrive\Desktop\RUBGLD_client\RUBGLD_client\RUBGLD_client\opengl.cpp(151,63): warning C4244: 'argument': conversion from 'GLsizeiptr' to 'GLsizei', possible loss of data
+  Generating code
+  Compiler switch has changed, fall back to full compilation.
+  All 183 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  RUBGLD_client.vcxproj -> C:\Users\mrdia\OneDrive\Desktop\RUBGLD_client\RUBGLD_client\RUBGLD_client\x64\Release\RUBGLD_client.exe
