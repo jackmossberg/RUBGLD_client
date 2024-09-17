@@ -1,6 +1,10 @@
 # Prerequisites
 *.d
 *.vs
+*.ipch
+*.png
+*.jpeg
+*.gltf
 
 # Compiled Object files
 *.slo
