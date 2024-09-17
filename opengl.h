@@ -85,12 +85,32 @@ namespace opengl {
 		void uniform_load_mat4(const char* u_name, glm::mat4 target, GLuint shader);
 	GLuint create_shader(const char* v_shader, const char* f_shader);
 
+	void load_vao_id(std::vector<GLfloat>* positions, std::vector<GLuint>* indices, std::vector<GLfloat>* uvs, std::vector<GLfloat>* normals, GLuint* _address);
+	void load_tex_id(GLenum BANK, GLenum filter_t, const char* fpath, GLuint* _address);
+	void load_shader_id(const char* v_shader, const char* f_shader, GLuint* _address);
+
 	GLuint load_vao_id(std::vector<GLfloat>* positions, std::vector<GLuint>* indices, std::vector<GLfloat>* uvs, std::vector<GLfloat>* normals);
 	GLuint load_tex_id(GLenum BANK, GLenum filter_t, const char* fpath);
 	GLuint load_shader_id(const char* v_shader, const char* f_shader);
 
 	eng::mesh load_mesh_from_fpath_ptr(const char* fpath);
 	eng::mesh load_mesh_from_fpath_str(std::string fpath);
+
+	namespace window {
+		_declspec(selectany) struct {
+			GLFWwindow* main_window;
+			uint16_t width, height;
+			const char* title;
+			glm::vec3 clear_color = glm::vec3(0.0f);
+		} data;
+		void start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen);
+		void start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen, glm::vec3 clear_color);
+		void end_window();
+		bool window_closed();
+		GLFWwindow* get_window();
+			void bind_window();
+			void unbind_window();
+	}
 
 	void free();
 }

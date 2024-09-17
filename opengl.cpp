@@ -165,6 +165,60 @@ GLuint opengl::ex::create_vao() {
 	GLuint id; glGenVertexArrays(1, &id); return id;
 }
 
+void opengl::load_vao_id(std::vector<GLfloat>* positions, std::vector<GLuint>* indices, std::vector<GLfloat>* uvs, std::vector<GLfloat>* normals, GLuint* _address) {
+	GLuint
+		vao_id,
+		vao_positions_buffer,
+		vao_indices_buffer,
+		vao_uvs_buffer,
+		vao_normals_buffer;
+	vao_id = ex::create_vao();
+	ex::vao_activate(vao_id);
+	vao_positions_buffer = ex::create_vbo_attrib(*positions);
+	vao_indices_buffer = ex::create_vbo_index(*indices);
+	vao_uvs_buffer = ex::create_vbo_attrib(*uvs);
+	vao_normals_buffer = ex::create_vbo_attrib(*normals);
+	ex::activate_vertex(vao_positions_buffer);
+	ex::activate_vertex(vao_uvs_buffer);
+	ex::activate_vertex(vao_normals_buffer);
+	ex::activate_index(vao_indices_buffer);
+	ex::Link_attrib(vao_positions_buffer, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
+	ex::Link_attrib(vao_uvs_buffer, 1, 2, GL_FLOAT, 2 * sizeof(float), (void*)0);
+	ex::Link_attrib(vao_normals_buffer, 2, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
+	ex::vao_terminate();
+	ex::terminate_vertex(vao_positions_buffer);
+	ex::terminate_vertex(vao_uvs_buffer);
+	ex::terminate_vertex(vao_normals_buffer);
+	ex::terminate_index(vao_indices_buffer);
+	registry::vaos.push_back(vao_id);
+	*_address =  vao_id;
+}
+void opengl::load_tex_id(GLenum BANK, GLenum filter_t, const char* fpath, GLuint* _address) {
+	GLuint tex_id;
+	int widthImg, heightImg, numColCh;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* bytes = stbi_load(fpath, &widthImg, &heightImg, &numColCh, 0);
+	glGenTextures(1, &tex_id);
+	glActiveTexture(BANK);
+	glBindTexture(GL_TEXTURE_2D, tex_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter_t);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter_t);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
+	stbi_image_free(bytes);
+	registry::vaos.push_back(tex_id);
+	*_address = tex_id;
+	glBindTexture(GL_TEXTURE_2D, tex_id);
+	glActiveTexture(0);
+}
+void opengl::load_shader_id(const char* v_shader, const char* f_shader, GLuint* _address) {
+	GLuint shader_id = create_shader(v_shader, f_shader);
+	shader_activate(shader_id); shader_terminate();
+	registry::vaos.push_back(shader_id);
+	*_address = shader_id;
+}
+
 GLuint opengl::load_vao_id(std::vector<GLfloat>* positions, std::vector<GLuint>* indices, std::vector<GLfloat>* uvs, std::vector<GLfloat>* normals) {
 	GLuint
 		vao_id,
@@ -218,6 +272,7 @@ GLuint opengl::load_shader_id(const char* v_shader, const char* f_shader) {
 	registry::vaos.push_back(shader_id);
 	return shader_id;
 }
+
 
 std::vector<GLfloat> load_GLfloat_list_from_json(json accessor, json JSON, std::vector<unsigned char> data) {
 	std::vector<GLfloat> positions;
@@ -344,7 +399,74 @@ eng::mesh opengl::load_mesh_from_fpath_str(std::string fpath) {
 	return result;
 }
 
+void opengl::window::start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen) {
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, false);
+	glfwWindowHint(GLFW_MAXIMIZED, fullscreen);
+		data.width = width; data.height = height;
+		data.main_window = glfwCreateWindow(width, height, title, NULL, NULL);
+		data.title = title;
+	glfwMakeContextCurrent(data.main_window);
+	gladLoadGL();
+	glViewport(0, 0, data.width, data.height);
+	glEnable(GL_DEPTH_TEST);
+}
+
+void opengl::window::start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen, glm::vec3 clear_color) {
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, false);
+	glfwWindowHint(GLFW_MAXIMIZED, fullscreen);
+		data.width = width; data.height = height;
+		data.main_window = glfwCreateWindow(width, height, title, NULL, NULL);
+		data.title = title; data.clear_color = clear_color;
+	glfwMakeContextCurrent(data.main_window);
+	gladLoadGL();
+	glViewport(0, 0, data.width, data.height);
+	glEnable(GL_DEPTH_TEST);
+}
+
+void opengl::window::end_window() {
+	if (
+		registry::vaos.size() != 0 ||
+		registry::textures.size() != 0 ||
+		registry::shaders.size() != 0
+	) opengl::free();
+	glfwDestroyWindow(data.main_window);
+	glfwTerminate();
+}
+
+bool opengl::window::window_closed() {
+	if (data.main_window != NULL) return glfwWindowShouldClose(data.main_window);
+	else return true;
+}
+
+GLFWwindow* opengl::window::get_window() {
+	if (data.main_window != NULL) return data.main_window;
+}
+
+void opengl::window::bind_window() {
+	glClearColor(
+			data.clear_color.x,
+			data.clear_color.y,
+			data.clear_color.z,
+		1.0f
+	);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void opengl::window::unbind_window() {
+	glfwSwapBuffers(data.main_window);
+	glfwPollEvents();
+}
+
 void opengl::free() {
+	if (window::data.main_window != NULL) window::end_window();
 	for (GLuint shader : registry::shaders) glDeleteProgram(shader);
 	for (GLuint vao : registry::vaos) glDeleteVertexArrays(1, &vao);
 	for (GLuint texture : registry::textures) glDeleteTextures(1, &texture);
