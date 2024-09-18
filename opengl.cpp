@@ -530,6 +530,7 @@ eng::framebuffer_rgb opengl::framebuffer::load_framebuffer(const uint16_t& width
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
+	opengl::registry::framebuffers.push_back(fbo);
 	return result;
 }
 
@@ -590,6 +591,7 @@ void opengl::framebuffer::load_framebuffer(const uint16_t& width, const uint16_t
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
+	opengl::registry::framebuffers.push_back(fbo);
 	*_address = result;
 }
 
