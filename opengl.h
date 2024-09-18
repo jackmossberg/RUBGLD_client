@@ -30,14 +30,21 @@
 
 using json = nlohmann::json;
 
+//bloom = 0.35f;
+//brightness = 1.25f;
+//render_scale = 7850.0f;
+//fog_amount = 0.075f;
+//fog_color = glm::vec3(0.5f, 0.5f, 0.65f);
+//ambient_light_power = 0.45f;
+
 namespace opengl {
 	__declspec(selectany) struct RENDER_SETTINGS {
-		float render_scale = 4500.0f;
+		float render_scale = 7850.0f;
 		float brightness = 1.25f;
-		float bloom = 0.15f;
+		float bloom = 0.35f;
 		float fog_amount = 0.01f;
-		glm::vec3 fog_color = glm::vec3(0.5f);
-		float ambient_light_power = 0.85f;
+		glm::vec3 fog_color = glm::vec3(0.5f, 0.5f, 0.65f);
+		float ambient_light_power = 0.45f;
 	} RENDER_SETTINGS;
 	namespace skybox {
 		__declspec(selectany) struct RENDER_SETTINGS {
@@ -97,16 +104,26 @@ namespace opengl {
 	eng::mesh load_mesh_from_fpath_ptr(const char* fpath);
 	eng::mesh load_mesh_from_fpath_str(std::string fpath);
 
-	eng::camera create_camera(glm::vec3 position, glm::vec3 rotation);
-	void create_camera(glm::vec3 position, glm::vec3 rotation, eng::camera* _address);
+	eng::camera_radians create_camera_radians(glm::vec3 position, glm::vec3 rotation);
+	void create_camera_radians(glm::vec3 position, glm::vec3 rotation, eng::camera_radians* _address);
+		eng::camera_locked create_camera_locked(glm::vec3 position, glm::vec3 look_position);
+		void create_camera_locked(glm::vec3 position, glm::vec3 look_position, eng::camera_locked* _address);
 
 	eng::model create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform);
 	eng::model create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform);
 	void create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform, eng::model* _address);
 	void create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform, eng::model* _address);
+		void draw_model(eng::model model, eng::camera_radians camera);
+		void draw_model(eng::model* model, eng::camera_radians* camera);
+			void draw_model(eng::model model, eng::camera_locked camera);
+			void draw_model(eng::model* model, eng::camera_locked* camera);
 
-	void draw_model(eng::model model, eng::camera camera);
-	void draw_model(eng::model* model, eng::camera* camera);
+	eng::skybox create_skybox(const char* cubemap_fpath);
+	void create_skybox(const char* cubemap_fpath, eng::skybox* _address);
+		void draw_skybox(eng::skybox skybox, eng::camera_radians camera);
+		void draw_skybox(eng::skybox* skybox, eng::camera_radians* camera);
+			void draw_skybox(eng::skybox skybox, eng::camera_locked camera);
+			void draw_skybox(eng::skybox* skybox, eng::camera_locked* camera);
 
 	namespace framebuffer {
 		eng::framebuffer_rgb load_framebuffer(uint16_t width, uint16_t height, GLuint* shader);
