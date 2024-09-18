@@ -413,8 +413,9 @@ void opengl::window::start_window(uint16_t width, uint16_t height, const char* t
 	gladLoadGL();
 	glViewport(0, 0, data.width, data.height);
 	glEnable(GL_DEPTH_TEST);
+		GLuint post_shader = load_shader_id("post.vert", "post.frag");
+		framebuffer::load_framebuffer(data.width, data.height, &post_shader, &data.main_framebuffer);
 }
-
 void opengl::window::start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen, glm::vec3 clear_color) {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -429,15 +430,51 @@ void opengl::window::start_window(uint16_t width, uint16_t height, const char* t
 	gladLoadGL();
 	glViewport(0, 0, data.width, data.height);
 	glEnable(GL_DEPTH_TEST);
+		GLuint post_shader = load_shader_id("post.vert", "post.frag");
+		framebuffer::load_framebuffer(data.width, data.height, &post_shader, &data.main_framebuffer);
+}
+void opengl::window::start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen, const char* shader_v, const char* shader_f) {
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, false);
+	glfwWindowHint(GLFW_MAXIMIZED, fullscreen);
+		data.width = width; data.height = height;
+		data.main_window = glfwCreateWindow(width, height, title, NULL, NULL);
+		data.title = title;
+	glfwMakeContextCurrent(data.main_window);
+	gladLoadGL();
+	glViewport(0, 0, data.width, data.height);
+	glEnable(GL_DEPTH_TEST);
+		GLuint post_shader = load_shader_id(shader_v, shader_f);
+		framebuffer::load_framebuffer(data.width, data.height, &post_shader, &data.main_framebuffer);
+}
+void opengl::window::start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen, glm::vec3 clear_color, const char* shader_v, const char* shader_f) {
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, false);
+	glfwWindowHint(GLFW_MAXIMIZED, fullscreen);
+		data.width = width; data.height = height;
+		data.main_window = glfwCreateWindow(width, height, title, NULL, NULL);
+		data.title = title; data.clear_color = clear_color;
+	glfwMakeContextCurrent(data.main_window);
+	gladLoadGL();
+	glViewport(0, 0, data.width, data.height);
+	glEnable(GL_DEPTH_TEST);
+		GLuint post_shader = load_shader_id(shader_v, shader_f);
+		framebuffer::load_framebuffer(data.width, data.height, &post_shader, &data.main_framebuffer);
 }
 
 void opengl::window::end_window() {
 	if (
+		registry::framebuffers.size() != 0 ||
 		registry::vaos.size() != 0 ||
 		registry::textures.size() != 0 ||
 		registry::shaders.size() != 0
 	) opengl::free();
-	glfwDestroyWindow(data.main_window);
 	glfwTerminate();
 }
 
@@ -451,6 +488,7 @@ GLFWwindow* opengl::window::get_window() {
 }
 
 void opengl::window::bind_window() {
+	framebuffer::bind_framebuffer_rgb(&data.main_framebuffer);
 	glClearColor(
 			data.clear_color.x,
 			data.clear_color.y,
@@ -463,17 +501,21 @@ void opengl::window::bind_window() {
 void opengl::window::unbind_window() {
 	glfwSwapBuffers(data.main_window);
 	glfwPollEvents();
+	framebuffer::unbind_framebuffer_rgb();
+
+	GLuint bloom_tex[1] = { framebuffer::load_tex_from_framebuffer_rgb(&data.main_framebuffer, GL_COLOR_ATTACHMENT1) };
+	framebuffer::draw_framebuffer(&data.main_framebuffer, bloom_tex);
 }
 
 void opengl::free() {
-	if (window::data.main_window != NULL) window::end_window();
+	if (window::data.main_window != NULL) glfwDestroyWindow(window::data.main_window);
 	for (GLuint shader : registry::shaders) glDeleteProgram(shader);
 	for (GLuint vao : registry::vaos) glDeleteVertexArrays(1, &vao);
 	for (GLuint texture : registry::textures) glDeleteTextures(1, &texture);
 	for (GLuint framebuffer : registry::framebuffers) glDeleteFramebuffers(1, &framebuffer);
 }
 
-eng::framebuffer_rgb opengl::framebuffer::load_framebuffer(const uint16_t& width, const uint16_t& height, const GLuint* const shader) {
+eng::framebuffer_rgb opengl::framebuffer::load_framebuffer(uint16_t width, uint16_t height, GLuint* shader) {
 	eng::framebuffer_rgb result = eng::framebuffer_rgb();
 	GLfloat _positions[18] = {
 		1.0f, -1.0f, 0.0f,
@@ -534,7 +576,7 @@ eng::framebuffer_rgb opengl::framebuffer::load_framebuffer(const uint16_t& width
 	return result;
 }
 
-void opengl::framebuffer::load_framebuffer(const uint16_t& width, const uint16_t& height, const GLuint* const shader, eng::framebuffer_rgb* _address) {
+void opengl::framebuffer::load_framebuffer(uint16_t width, uint16_t height, GLuint* shader, eng::framebuffer_rgb* _address) {
 	eng::framebuffer_rgb result = eng::framebuffer_rgb();
 	GLfloat _positions[18] = {
 		1.0f, -1.0f, 0.0f,
@@ -615,6 +657,8 @@ GLuint opengl::framebuffer::load_tex_from_framebuffer_rgb(const eng::framebuffer
 	};
 	glDrawBuffers(5, attachments);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	opengl::registry::textures.push_back(texture);
 	return texture;
 }
 

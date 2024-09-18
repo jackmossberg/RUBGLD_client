@@ -97,6 +97,18 @@ namespace opengl {
 	eng::mesh load_mesh_from_fpath_ptr(const char* fpath);
 	eng::mesh load_mesh_from_fpath_str(std::string fpath);
 
+	namespace framebuffer {
+		eng::framebuffer_rgb load_framebuffer(uint16_t width, uint16_t height, GLuint* shader);
+		void load_framebuffer(uint16_t width, uint16_t height, GLuint* shader, eng::framebuffer_rgb* _address);
+
+		GLuint load_tex_from_framebuffer_rgb(const eng::framebuffer_rgb* t_framebuffer, const GLuint& color_attachment);
+
+		void bind_framebuffer_rgb(const eng::framebuffer_rgb* t_framebuffer);
+		void unbind_framebuffer_rgb();
+
+		void draw_framebuffer(const eng::framebuffer_rgb* t_framebuffer, GLuint textures[]);
+	}
+
 	namespace window {
 		_declspec(selectany) struct {
 			GLFWwindow* main_window;
@@ -107,23 +119,13 @@ namespace opengl {
 		} data;
 		void start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen);
 		void start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen, glm::vec3 clear_color);
+		void start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen, const char* shader_v, const char* shader_f);
+		void start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen, glm::vec3 clear_color, const char* shader_v, const char* shader_f);
 		void end_window();
 		bool window_closed();
 		GLFWwindow* get_window();
 			void bind_window();
 			void unbind_window();
-	}
-
-	namespace framebuffer {
-		eng::framebuffer_rgb load_framebuffer(const uint16_t& width, const uint16_t& height, const GLuint* const shader);
-		void load_framebuffer(const uint16_t& width, const uint16_t& height, const GLuint* const shader, eng::framebuffer_rgb* _address);
-		
-		GLuint load_tex_from_framebuffer_rgb(const eng::framebuffer_rgb* t_framebuffer, const GLuint& color_attachment);
-		
-		void bind_framebuffer_rgb(const eng::framebuffer_rgb* t_framebuffer);
-		void unbind_framebuffer_rgb();
-
-		void draw_framebuffer(const eng::framebuffer_rgb* t_framebuffer, GLuint textures[]);
 	}
 
 	void free();
