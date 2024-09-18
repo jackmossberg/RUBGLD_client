@@ -32,11 +32,11 @@ using json = nlohmann::json;
 
 namespace opengl {
 	__declspec(selectany) struct RENDER_SETTINGS {
-		float render_scale = 1500.0f;
-		float brightness = 1.65f;
-		float bloom = 0.35f;
-		float fog_amount = 0.05f;
-		glm::vec3 fog_color = glm::vec3(0.2f);
+		float render_scale = 4500.0f;
+		float brightness = 1.25f;
+		float bloom = 0.15f;
+		float fog_amount = 0.01f;
+		glm::vec3 fog_color = glm::vec3(0.5f);
 		float ambient_light_power = 0.85f;
 	} RENDER_SETTINGS;
 	namespace skybox {
@@ -96,6 +96,17 @@ namespace opengl {
 
 	eng::mesh load_mesh_from_fpath_ptr(const char* fpath);
 	eng::mesh load_mesh_from_fpath_str(std::string fpath);
+
+	eng::camera create_camera(glm::vec3 position, glm::vec3 rotation);
+	void create_camera(glm::vec3 position, glm::vec3 rotation, eng::camera* _address);
+
+	eng::model create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform);
+	eng::model create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform);
+	void create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform, eng::model* _address);
+	void create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform, eng::model* _address);
+
+	void draw_model(eng::model model, eng::camera camera);
+	void draw_model(eng::model* model, eng::camera* camera);
 
 	namespace framebuffer {
 		eng::framebuffer_rgb load_framebuffer(uint16_t width, uint16_t height, GLuint* shader);

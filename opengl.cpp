@@ -1,5 +1,12 @@
 #include"opengl.h"
 
+glm::mat4 gen_view_matrix(eng::camera camera);
+glm::mat4 gen_view_matrix(eng::camera* camera);
+glm::mat4 gen_projection_matrix(eng::camera camera);
+glm::mat4 gen_projection_matrix(eng::camera* camera);
+glm::mat4 gen_transform_matrix(eng::transform transform);
+glm::mat4 gen_transform_matrix(eng::transform* transform);
+
 std::string opengl::parse_file_from_fpath_ptr(const char* fname) {
 	std::ifstream in(fname, std::ios::in | std::ios::binary);
 	if (in) {
@@ -207,7 +214,7 @@ void opengl::load_tex_id(GLenum BANK, GLenum filter_t, const char* fpath, GLuint
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
 	stbi_image_free(bytes);
-	registry::vaos.push_back(tex_id);
+	registry::textures.push_back(tex_id);
 	*_address = tex_id;
 	glBindTexture(GL_TEXTURE_2D, tex_id);
 	glActiveTexture(0);
@@ -215,7 +222,7 @@ void opengl::load_tex_id(GLenum BANK, GLenum filter_t, const char* fpath, GLuint
 void opengl::load_shader_id(const char* v_shader, const char* f_shader, GLuint* _address) {
 	GLuint shader_id = create_shader(v_shader, f_shader);
 	shader_activate(shader_id); shader_terminate();
-	registry::vaos.push_back(shader_id);
+	registry::shaders.push_back(shader_id);
 	*_address = shader_id;
 }
 
@@ -261,7 +268,7 @@ GLuint opengl::load_tex_id(GLenum BANK, GLenum filter_t, const char* fpath) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
 	stbi_image_free(bytes);
-	registry::vaos.push_back(tex_id);
+	registry::textures.push_back(tex_id);
 	return tex_id;
 	glBindTexture(GL_TEXTURE_2D, tex_id);
 	glActiveTexture(0);
@@ -269,7 +276,7 @@ GLuint opengl::load_tex_id(GLenum BANK, GLenum filter_t, const char* fpath) {
 GLuint opengl::load_shader_id(const char* v_shader, const char* f_shader) {
 	GLuint shader_id = create_shader(v_shader, f_shader);
 	shader_activate(shader_id); shader_terminate();
-	registry::vaos.push_back(shader_id);
+	registry::shaders.push_back(shader_id);
 	return shader_id;
 }
 
@@ -399,6 +406,134 @@ eng::mesh opengl::load_mesh_from_fpath_str(std::string fpath) {
 	return result;
 }
 
+eng::camera opengl::create_camera(glm::vec3 position, glm::vec3 rotation) {
+	eng::camera result = eng::camera();
+		result.position = position;
+		result.rotation = rotation;
+		result.fov = 90.0f;
+		result.near_plane = 0.001f;
+		result.far_plane = 1000.0f;
+	return result;
+}
+
+void opengl::create_camera(glm::vec3 position, glm::vec3 rotation, eng::camera* _address) {
+	eng::camera result = eng::camera();
+		result.position = position;
+		result.rotation = rotation;
+		result.fov = 90.0f;
+		result.near_plane = 0.001f;
+		result.far_plane = 1000.0f;
+	*_address = result;
+}
+
+eng::model opengl::create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform) {
+	eng::mesh mesh = load_mesh_from_fpath_ptr(mesh_fpath);
+		std::vector<GLfloat>* positions = &mesh.positions;
+		std::vector<GLuint>* indices = &mesh.indices;
+		std::vector<GLfloat>* uvs = &mesh.uvs;
+		std::vector<GLfloat>* normals = &mesh.normals;
+	eng::model result;
+		result.mesh = mesh;
+		result.transform = transform;
+		result.texture_scale = texture_scale;
+		result.vao = load_vao_id(positions, indices, uvs, normals);
+		result.texture = load_tex_id(GL_TEXTURE0, GL_NEAREST, texture_fpath);
+		result.shader = load_shader_id("default.vert", "default.frag");
+	return result;
+}
+void opengl::create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform, eng::model* _address) {
+	eng::mesh mesh = load_mesh_from_fpath_ptr(mesh_fpath);
+		std::vector<GLfloat>* positions = &mesh.positions;
+		std::vector<GLuint>* indices = &mesh.indices;
+		std::vector<GLfloat>* uvs = &mesh.uvs;
+		std::vector<GLfloat>* normals = &mesh.normals;
+	eng::model result;
+		result.mesh = mesh;
+		result.transform = transform;
+		result.texture_scale = texture_scale;
+		result.vao = load_vao_id(positions, indices, uvs, normals);
+		result.texture = load_tex_id(GL_TEXTURE0, GL_NEAREST, texture_fpath);
+		result.shader = load_shader_id("default.vert", "default.frag");
+	*_address = result;
+}
+eng::model opengl::create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform) {
+	eng::mesh mesh = load_mesh_from_fpath_ptr(mesh_fpath);
+		std::vector<GLfloat>* positions = &mesh.positions;
+		std::vector<GLuint>* indices = &mesh.indices;
+		std::vector<GLfloat>* uvs = &mesh.uvs;
+		std::vector<GLfloat>* normals = &mesh.normals;
+	eng::model result;
+		result.mesh = mesh;
+		result.transform = transform;
+		result.texture_scale = texture_scale;
+		result.vao = load_vao_id(positions, indices, uvs, normals);
+		result.texture = load_tex_id(GL_TEXTURE0, GL_NEAREST, texture_fpath);
+		result.shader = *shader;
+	return result;
+}
+void opengl::create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform, eng::model* _address) {
+	eng::mesh mesh = load_mesh_from_fpath_ptr(mesh_fpath);
+		std::vector<GLfloat>* positions = &mesh.positions;
+		std::vector<GLuint>* indices = &mesh.indices;
+		std::vector<GLfloat>* uvs = &mesh.uvs;
+		std::vector<GLfloat>* normals = &mesh.normals;
+	eng::model result;
+		result.mesh = mesh;
+		result.transform = transform;
+		result.texture_scale = texture_scale;
+		result.vao = load_vao_id(positions, indices, uvs, normals);
+		result.texture = load_tex_id(GL_TEXTURE0, GL_NEAREST, texture_fpath);
+		result.shader = *shader;
+	*_address = result;
+}
+
+void opengl::draw_model(eng::model model, eng::camera camera) {
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glCullFace(GL_BACK);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	opengl::shader_activate(model.shader);
+		opengl::uniform_load_mat4("model_matrix", gen_transform_matrix(model.transform), model.shader);
+		opengl::uniform_load_mat4("view_matrix", gen_view_matrix(camera), model.shader);
+		opengl::uniform_load_mat4("projection_matrix", gen_projection_matrix(camera), model.shader);
+			opengl::uniform_load_float("tex0_scale", model.texture_scale, model.shader);
+			opengl::uniform_load_texture_2D("tex0", model.texture, model.shader, GL_TEXTURE0);
+			opengl::uniform_load_float("fog_amount", opengl::RENDER_SETTINGS.fog_amount, model.shader);
+			opengl::uniform_load_vec3("fog_color", opengl::RENDER_SETTINGS.fog_color, model.shader);
+			opengl::uniform_load_float("ambient_light_power", opengl::RENDER_SETTINGS.ambient_light_power, model.shader);
+			opengl::uniform_load_vec3("d_light_direction", glm::vec3(0.0f, 1.0f, 0.0f), model.shader);
+			opengl::uniform_load_vec3("d_light_color", glm::vec3(1.0f), model.shader);
+			opengl::uniform_load_float("d_light_power", 2.5f, model.shader);
+				opengl::ex::vao_activate(model.vao);
+					glDrawElements(GL_TRIANGLES, sizeof(model.mesh.indices) * model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			opengl::ex::vao_terminate();
+	opengl::shader_terminate();
+}
+void opengl::draw_model(eng::model* model, eng::camera* camera) {
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glCullFace(GL_BACK);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	opengl::shader_activate(model->shader);
+		opengl::uniform_load_mat4("model_matrix", gen_transform_matrix(model->transform), model->shader);
+		opengl::uniform_load_mat4("view_matrix", gen_view_matrix(camera), model->shader);
+		opengl::uniform_load_mat4("projection_matrix", gen_projection_matrix(camera), model->shader);
+			opengl::uniform_load_float("tex0_scale", model->texture_scale, model->shader);
+			opengl::uniform_load_texture_2D("tex0", model->texture, model->shader, GL_TEXTURE0);
+			opengl::uniform_load_float("fog_amount", opengl::RENDER_SETTINGS.fog_amount, model->shader);
+			opengl::uniform_load_vec3("fog_color", opengl::RENDER_SETTINGS.fog_color, model->shader);
+			opengl::uniform_load_float("ambient_light_power", opengl::RENDER_SETTINGS.ambient_light_power, model->shader);
+			opengl::uniform_load_vec3("d_light_direction", glm::vec3(0.0f, 1.0f, 0.0f), model->shader);
+			opengl::uniform_load_vec3("d_light_color", glm::vec3(1.0f), model->shader);
+			opengl::uniform_load_float("d_light_power", 2.5f, model->shader);
+				opengl::ex::vao_activate(model->vao);
+					glDrawElements(GL_TRIANGLES, sizeof(model->mesh.indices) * model->mesh.indices.size(), GL_UNSIGNED_INT, 0);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			opengl::ex::vao_terminate();
+	opengl::shader_terminate();
+}
+
 void opengl::window::start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen) {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -499,12 +634,14 @@ void opengl::window::bind_window() {
 }
 
 void opengl::window::unbind_window() {
-	glfwSwapBuffers(data.main_window);
-	glfwPollEvents();
 	framebuffer::unbind_framebuffer_rgb();
 
 	GLuint bloom_tex[1] = { framebuffer::load_tex_from_framebuffer_rgb(&data.main_framebuffer, GL_COLOR_ATTACHMENT1) };
 	framebuffer::draw_framebuffer(&data.main_framebuffer, bloom_tex);
+	glDeleteTextures(1, &bloom_tex[0]);
+
+	glfwSwapBuffers(data.main_window);
+	glfwPollEvents();
 }
 
 void opengl::free() {
@@ -658,7 +795,6 @@ GLuint opengl::framebuffer::load_tex_from_framebuffer_rgb(const eng::framebuffer
 	glDrawBuffers(5, attachments);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	opengl::registry::textures.push_back(texture);
 	return texture;
 }
 
@@ -687,4 +823,71 @@ void opengl::framebuffer::draw_framebuffer(const eng::framebuffer_rgb* t_framebu
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindVertexArray(0);
 	opengl::shader_terminate();
+}
+
+glm::mat4 gen_view_matrix(eng::camera camera) {
+	glm::mat4 result = glm::mat4(1.0);
+	result = glm::rotate(result, glm::radians(camera.rotation.y), glm::vec3(0, 1, 0));
+	result = glm::rotate(result, glm::radians(camera.rotation.x), glm::vec3(1, 0, 0));
+	result = glm::rotate(result, glm::radians(camera.rotation.z), glm::vec3(0, 0, 1));
+	result = glm::translate(result, camera.position);
+	return result;
+}
+glm::mat4 gen_view_matrix(eng::camera* camera) {
+	glm::mat4 result = glm::mat4(1.0);
+	result = glm::rotate(result, glm::radians(camera->rotation.y), glm::vec3(0, 1, 0));
+	result = glm::rotate(result, glm::radians(camera->rotation.x), glm::vec3(1, 0, 0));
+	result = glm::rotate(result, glm::radians(camera->rotation.z), glm::vec3(0, 0, 1));
+	result = glm::translate(result, camera->position);
+	return result;
+}
+glm::mat4 gen_projection_matrix(eng::camera camera) {
+	glm::mat4 result = glm::mat4(1.0);
+	result = glm::perspective(
+		glm::radians(camera.fov),
+		(float)opengl::window::data.width / (opengl::window::data.height),
+		camera.near_plane,
+		camera.far_plane
+	); return result;
+}
+glm::mat4 gen_projection_matrix(eng::camera* camera) {
+	glm::mat4 result = glm::mat4(1.0);
+	result = glm::perspective(
+		glm::radians(camera->fov),
+		(float)opengl::window::data.width / (opengl::window::data.height),
+		camera->near_plane,
+		camera->far_plane
+	); return result;
+}
+glm::mat4 gen_transform_matrix(eng::transform transform) {
+	glm::mat4 result = glm::mat4(1.0);
+	result = glm::translate(result, transform.position);
+	result = glm::rotate(result, glm::radians(transform.rotation.y), glm::vec3(0, 1, 0));
+	result = glm::rotate(result, glm::radians(transform.rotation.x), glm::vec3(1, 0, 0));
+	result = glm::rotate(result, glm::radians(transform.rotation.z), glm::vec3(0, 0, 1));
+	result = glm::scale(result, transform.scale);
+		if (transform.parent != NULL) {
+			result = glm::translate(result, transform.parent->position);
+			result = glm::rotate(result, glm::radians(transform.parent->rotation.y), glm::vec3(0, 1, 0));
+			result = glm::rotate(result, glm::radians(transform.parent->rotation.x), glm::vec3(1, 0, 0));
+			result = glm::rotate(result, glm::radians(transform.parent->rotation.z), glm::vec3(0, 0, 1));
+			result = glm::scale(result, transform.parent->scale);
+		}
+	return result;
+}
+glm::mat4 gen_transform_matrix(eng::transform* transform) {
+	glm::mat4 result = glm::mat4(1.0);
+		result = glm::translate(result, transform->position);
+		result = glm::rotate(result, glm::radians(transform->rotation.y), glm::vec3(0, 1, 0));
+		result = glm::rotate(result, glm::radians(transform->rotation.x), glm::vec3(1, 0, 0));
+		result = glm::rotate(result, glm::radians(transform->rotation.z), glm::vec3(0, 0, 1));
+		result = glm::scale(result, transform->scale);
+			if (transform->parent != NULL) {
+				result = glm::translate(result, transform->parent->position);
+				result = glm::rotate(result, glm::radians(transform->parent->rotation.y), glm::vec3(0, 1, 0));
+				result = glm::rotate(result, glm::radians(transform->parent->rotation.x), glm::vec3(1, 0, 0));
+				result = glm::rotate(result, glm::radians(transform->parent->rotation.z), glm::vec3(0, 0, 1));
+				result = glm::scale(result, transform->parent->scale);
+			}
+	return result;
 }

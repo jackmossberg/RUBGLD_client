@@ -72,6 +72,6 @@ void main() {
 
     vec4 final_color = ((texture(tex0, _uv_f) + blurred_color) / 2) * brightness;
 
-    //main_frag = final_color;
-    main_frag = vec4(_position, 1.0f);
+    main_frag = final_color;
+    //main_frag = vec4(_position, 1.0f);
 }

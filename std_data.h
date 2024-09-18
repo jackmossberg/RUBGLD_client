@@ -12,18 +12,33 @@
 #include<glm/gtc/type_ptr.hpp>
 
 namespace eng {
+	typedef struct camera {
+		glm::vec3 position;
+		glm::vec3 rotation;
+			float fov;
+			float near_plane;
+			float far_plane;
+	};
+
 	typedef struct mesh {
-		const std::vector<GLfloat> positions;
-		const std::vector<GLuint> indices;
-		const std::vector<GLfloat> uvs;
-		const std::vector<GLfloat> normals;
+		std::vector<GLfloat> positions;
+		std::vector<GLuint> indices;
+		std::vector<GLfloat> uvs;
+		std::vector<GLfloat> normals;
 	};
 
 	typedef struct transform {
-			const transform* parent;
-		glm::vec3 position;
-		glm::vec3 rotation;
-		glm::vec3 scale;
+			transform* parent = NULL;
+		glm::vec3 position = glm::vec3(0.0f);
+		glm::vec3 rotation = glm::vec3(0.0f);
+		glm::vec3 scale = glm::vec3(1.0f);
+	};
+
+	typedef struct model {
+		GLuint vao, texture, shader;
+			transform transform;
+			mesh mesh;
+				float texture_scale;
 	};
 
 	typedef struct framebuffer_rgb {
