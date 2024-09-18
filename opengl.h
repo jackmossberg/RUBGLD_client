@@ -50,6 +50,7 @@ namespace opengl {
 		__declspec(selectany) std::vector<GLuint> vaos;
 		__declspec(selectany) std::vector<GLuint> textures;
 		__declspec(selectany) std::vector<GLuint> shaders;
+		_declspec(selectany) std::vector<GLuint> framebuffers;
 	}
 	
 	namespace ex {
@@ -99,9 +100,10 @@ namespace opengl {
 	namespace window {
 		_declspec(selectany) struct {
 			GLFWwindow* main_window;
-			uint16_t width, height;
-			const char* title;
-			glm::vec3 clear_color = glm::vec3(0.0f);
+			eng::framebuffer_rgb main_framebuffer;
+				uint16_t width, height;
+				const char* title = "GAME";
+				glm::vec3 clear_color = glm::vec3(0.0f);
 		} data;
 		void start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen);
 		void start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen, glm::vec3 clear_color);
@@ -110,6 +112,18 @@ namespace opengl {
 		GLFWwindow* get_window();
 			void bind_window();
 			void unbind_window();
+	}
+
+	namespace framebuffer {
+		eng::framebuffer_rgb load_framebuffer(const uint16_t& width, const uint16_t& height, const GLuint* const shader);
+		void load_framebuffer(const uint16_t& width, const uint16_t& height, const GLuint* const shader, eng::framebuffer_rgb* _address);
+		
+		GLuint load_tex_from_framebuffer_rgb(const eng::framebuffer_rgb* t_framebuffer, const GLuint& color_attachment);
+		
+		void bind_framebuffer_rgb(const eng::framebuffer_rgb* t_framebuffer);
+		void unbind_framebuffer_rgb();
+
+		void draw_framebuffer(const eng::framebuffer_rgb* t_framebuffer, GLuint textures[]);
 	}
 
 	void free();
