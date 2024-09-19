@@ -59,6 +59,10 @@ namespace eng {
 		bool rasturized = false;
 		uint16_t width, height;
 	};
+
+	glm::vec2 vec2_lerp(glm::vec2 start_value, glm::vec2 end_value, float t);
+	glm::vec3 vec3_lerp(glm::vec3 start_value, glm::vec3 end_value, float t);
+	float perlin(float x, float y);
 }
 
 #endif // !STANDARD_DATA_STRUCTURES_H

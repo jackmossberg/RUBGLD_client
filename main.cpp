@@ -13,13 +13,17 @@ int main() {
 
 	eng::skybox _skybox = opengl::create_skybox("res/eng/skybox_3");
 
-	eng::model _model = opengl::create_model("res/eng/BOX.gltf", "res/eng/UV_TEST.png", 3.5f, &default_shader, eng::transform { NULL, glm::vec3(0.0f, 0.0f, 0.0f)});
+	eng::model _model = opengl::create_model("res/eng/BOX.gltf", "res/eng/Green/texture_09.png", 3.5f, &default_shader, eng::transform { NULL, glm::vec3(0.0f, 0.0f, 0.0f)});
+
+	uint16_t terrain_size = 150;
+	eng::model _terrain = opengl::generate_plane("res/eng/UV_TEST.png", 15.5f, &default_shader, eng::transform{ NULL, glm::vec3(-terrain_size/2, -5.0f, -terrain_size /2) }, 4.5f, 15.0f, terrain_size);
 	
 	while (!opengl::window::window_closed()) {
 		_model.transform.rotation.y += 0.065f;
 		opengl::window::bind_window();
 		opengl::draw_skybox(&_skybox, &_camera);
 			opengl::draw_model(&_model, &_camera);
+			opengl::draw_model(&_terrain, &_camera);
 		opengl::window::unbind_window();
 	}
 	opengl::window::end_window();

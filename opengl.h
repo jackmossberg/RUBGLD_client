@@ -42,7 +42,7 @@ namespace opengl {
 		float render_scale = 7850.0f;
 		float brightness = 1.25f;
 		float bloom = 0.35f;
-		float fog_amount = 0.01f;
+		float fog_amount = 0.075f;
 		glm::vec3 fog_color = glm::vec3(0.5f, 0.5f, 0.65f);
 		float ambient_light_power = 0.45f;
 	} RENDER_SETTINGS;
@@ -105,18 +105,23 @@ namespace opengl {
 	eng::mesh load_mesh_from_fpath_str(std::string fpath);
 
 	eng::camera_radians create_camera_radians(glm::vec3 position, glm::vec3 rotation);
-	void create_camera_radians(glm::vec3 position, glm::vec3 rotation, eng::camera_radians* _address);
-		eng::camera_locked create_camera_locked(glm::vec3 position, glm::vec3 look_position);
+		void create_camera_radians(glm::vec3 position, glm::vec3 rotation, eng::camera_radians* _address);
+	eng::camera_locked create_camera_locked(glm::vec3 position, glm::vec3 look_position);
 		void create_camera_locked(glm::vec3 position, glm::vec3 look_position, eng::camera_locked* _address);
 
+	eng::model generate_plane(const char* texture_fpath, float texture_scale, eng::transform transform, float noise_height, float noise_freq, uint16_t size);
+	eng::model generate_plane(const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform, float noise_height, float noise_freq, uint16_t size);
+		void generate_plane(const char* texture_fpath, float texture_scale, eng::transform transform, eng::model* _address, float noise_height, float noise_freq, uint16_t size);
+		void generate_plane(const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform, eng::model* _address, float noise_height, float noise_freq, uint16_t size);
 	eng::model create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform);
 	eng::model create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform);
-	void create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform, eng::model* _address);
-	void create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform, eng::model* _address);
-		void draw_model(eng::model model, eng::camera_radians camera);
-		void draw_model(eng::model* model, eng::camera_radians* camera);
-			void draw_model(eng::model model, eng::camera_locked camera);
-			void draw_model(eng::model* model, eng::camera_locked* camera);
+		void create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform, eng::model* _address);
+		void create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform, eng::model* _address);
+	
+	void draw_model(eng::model model, eng::camera_radians camera);
+	void draw_model(eng::model* model, eng::camera_radians* camera);
+		void draw_model(eng::model model, eng::camera_locked camera);
+		void draw_model(eng::model* model, eng::camera_locked* camera);
 
 	eng::skybox create_skybox(const char* cubemap_fpath);
 	void create_skybox(const char* cubemap_fpath, eng::skybox* _address);

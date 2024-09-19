@@ -448,6 +448,187 @@ void opengl::create_camera_locked(glm::vec3 position, glm::vec3 look_position, e
 	*_address = result;
 }
 
+eng::model opengl::generate_plane(const char* texture_fpath, float texture_scale, eng::transform transform, float noise_height, float noise_freq, uint16_t size) {
+	eng::mesh t_mesh = eng::mesh();
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			glm::vec3 crnt_pos = glm::vec3(row, eng::perlin((float)col / noise_freq, (float)row / noise_freq) * noise_height, col);
+			t_mesh.positions.push_back(crnt_pos.x);
+			t_mesh.positions.push_back(crnt_pos.y);
+			t_mesh.positions.push_back(crnt_pos.z);
+		}
+	}
+	for (int row = 0; row < size; row++) {
+		for (int col = 0; col < size; col++) {
+			GLuint index = row * (size + 1) + col;
+			t_mesh.indices.push_back(index);
+			t_mesh.indices.push_back(index + (size + 1) + 1);
+			t_mesh.indices.push_back(index + (size + 1));
+			t_mesh.indices.push_back(index);
+			t_mesh.indices.push_back(index + 1);
+			t_mesh.indices.push_back(index + (size + 1) + 1);
+		}
+	}
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			t_mesh.uvs.push_back((GLfloat)col / size);
+			t_mesh.uvs.push_back((GLfloat)row / size);
+		}
+	}
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			glm::vec3 crnt_norm = glm::vec3(0.0f, 1.0f, 0.0f);
+			t_mesh.normals.push_back(crnt_norm.x);
+			t_mesh.normals.push_back(crnt_norm.y);
+			t_mesh.normals.push_back(crnt_norm.z);
+		}
+	}
+
+	eng::model result = eng::model();
+		result.texture_scale = texture_scale;
+		result.mesh = t_mesh;
+		result.transform = transform;
+		result.shader = opengl::load_shader_id("default.vert", "default.frag");
+		result.texture = opengl::load_tex_id(GL_TEXTURE0, GL_NEAREST, texture_fpath);
+		result.vao = opengl::load_vao_id(&result.mesh.positions, &result.mesh.indices, &result.mesh.uvs, &result.mesh.normals);
+	return result;
+}
+eng::model opengl::generate_plane(const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform, float noise_height, float noise_freq, uint16_t size) {
+	eng::mesh t_mesh = eng::mesh();
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			glm::vec3 crnt_pos = glm::vec3(row, eng::perlin((float)col / noise_freq, (float)row / noise_freq) * noise_height, col);
+			t_mesh.positions.push_back(crnt_pos.x);
+			t_mesh.positions.push_back(crnt_pos.y);
+			t_mesh.positions.push_back(crnt_pos.z);
+		}
+	}
+	for (int row = 0; row < size; row++) {
+		for (int col = 0; col < size; col++) {
+			GLuint index = row * (size + 1) + col;
+			t_mesh.indices.push_back(index);
+			t_mesh.indices.push_back(index + (size + 1) + 1);
+			t_mesh.indices.push_back(index + (size + 1));
+			t_mesh.indices.push_back(index);
+			t_mesh.indices.push_back(index + 1);
+			t_mesh.indices.push_back(index + (size + 1) + 1);
+		}
+	}
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			t_mesh.uvs.push_back((GLfloat)col / size);
+			t_mesh.uvs.push_back((GLfloat)row / size);
+		}
+	}
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			glm::vec3 crnt_norm = glm::vec3(0.0f, 1.0f, 0.0f);
+			t_mesh.normals.push_back(crnt_norm.x);
+			t_mesh.normals.push_back(crnt_norm.y);
+			t_mesh.normals.push_back(crnt_norm.z);
+		}
+	}
+
+	eng::model result = eng::model();
+		result.texture_scale = texture_scale;
+		result.mesh = t_mesh;
+		result.shader = *shader;
+		result.transform = transform;
+		result.texture = opengl::load_tex_id(GL_TEXTURE0, GL_NEAREST, texture_fpath);
+		result.vao = opengl::load_vao_id(&result.mesh.positions, &result.mesh.indices, &result.mesh.uvs, &result.mesh.normals);
+	return result;
+}
+void opengl::generate_plane(const char* texture_fpath, float texture_scale, eng::transform transform, eng::model* _address, float noise_height, float noise_freq, uint16_t size) {
+	eng::mesh t_mesh = eng::mesh();
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			glm::vec3 crnt_pos = glm::vec3(row, eng::perlin((float)col / noise_freq, (float)row / noise_freq) * noise_height, col);
+			t_mesh.positions.push_back(crnt_pos.x);
+			t_mesh.positions.push_back(crnt_pos.y);
+			t_mesh.positions.push_back(crnt_pos.z);
+		}
+	}
+	for (int row = 0; row < size; row++) {
+		for (int col = 0; col < size; col++) {
+			GLuint index = row * (size + 1) + col;
+			t_mesh.indices.push_back(index);
+			t_mesh.indices.push_back(index + (size + 1) + 1);
+			t_mesh.indices.push_back(index + (size + 1));
+			t_mesh.indices.push_back(index);
+			t_mesh.indices.push_back(index + 1);
+			t_mesh.indices.push_back(index + (size + 1) + 1);
+		}
+	}
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			t_mesh.uvs.push_back((GLfloat)col / size);
+			t_mesh.uvs.push_back((GLfloat)row / size);
+		}
+	}
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			glm::vec3 crnt_norm = glm::vec3(0.0f, 1.0f, 0.0f);
+			t_mesh.normals.push_back(crnt_norm.x);
+			t_mesh.normals.push_back(crnt_norm.y);
+			t_mesh.normals.push_back(crnt_norm.z);
+		}
+	}
+
+	eng::model result = eng::model();
+		result.texture_scale = texture_scale;
+		result.mesh = t_mesh;
+		result.transform = transform;
+		result.shader = opengl::load_shader_id("default.vert", "default.frag");
+		result.texture = opengl::load_tex_id(GL_TEXTURE0, GL_NEAREST, texture_fpath);
+		result.vao = opengl::load_vao_id(&result.mesh.positions, &result.mesh.indices, &result.mesh.uvs, &result.mesh.normals);
+	*_address = result;
+}
+void opengl::generate_plane(const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform, eng::model* _address, float noise_height, float noise_freq, uint16_t size) {
+	eng::mesh t_mesh = eng::mesh();
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			glm::vec3 crnt_pos = glm::vec3(row, eng::perlin((float)col / noise_freq, (float)row / noise_freq) * noise_height, col);
+			t_mesh.positions.push_back(crnt_pos.x);
+			t_mesh.positions.push_back(crnt_pos.y);
+			t_mesh.positions.push_back(crnt_pos.z);
+		}
+	}
+	for (int row = 0; row < size; row++) {
+		for (int col = 0; col < size; col++) {
+			GLuint index = row * (size + 1) + col;
+			t_mesh.indices.push_back(index);
+			t_mesh.indices.push_back(index + (size + 1) + 1);
+			t_mesh.indices.push_back(index + (size + 1));
+			t_mesh.indices.push_back(index);
+			t_mesh.indices.push_back(index + 1);
+			t_mesh.indices.push_back(index + (size + 1) + 1);
+		}
+	}
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			t_mesh.uvs.push_back((GLfloat)col / size);
+			t_mesh.uvs.push_back((GLfloat)row / size);
+		}
+	}
+	for (int row = 0; row < size + 1; row++) {
+		for (int col = 0; col < size + 1; col++) {
+			glm::vec3 crnt_norm = glm::vec3(0.0f, 1.0f, 0.0f);
+			t_mesh.normals.push_back(crnt_norm.x);
+			t_mesh.normals.push_back(crnt_norm.y);
+			t_mesh.normals.push_back(crnt_norm.z);
+		}
+	}
+
+	eng::model result = eng::model();
+		result.texture_scale = texture_scale;
+		result.mesh = t_mesh;
+		result.shader = *shader;
+		result.transform = transform;
+		result.texture = opengl::load_tex_id(GL_TEXTURE0, GL_NEAREST, texture_fpath);
+		result.vao = opengl::load_vao_id(&result.mesh.positions, &result.mesh.indices, &result.mesh.uvs, &result.mesh.normals);
+	*_address = result;
+}
+
 eng::model opengl::create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform) {
 	eng::mesh mesh = load_mesh_from_fpath_ptr(mesh_fpath);
 		std::vector<GLfloat>* positions = &mesh.positions;
