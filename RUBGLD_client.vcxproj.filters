@@ -56,5 +56,11 @@
     <None Include="skybox.frag">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="debug.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="debug.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

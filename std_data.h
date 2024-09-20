@@ -49,6 +49,16 @@ namespace eng {
 				float texture_scale;
 	};
 
+	typedef struct debug_element {
+		GLuint vao, shader;
+			transform transform;
+			mesh mesh;
+		struct {
+			bool wireframe;
+			glm::vec3 draw_color;
+		} config;
+	};
+
 	typedef struct skybox {
 		GLuint vao, cubemap, shader;
 		mesh mesh;

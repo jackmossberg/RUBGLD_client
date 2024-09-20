@@ -284,7 +284,6 @@ GLuint opengl::load_shader_id(const char* v_shader, const char* f_shader) {
 	return shader_id;
 }
 
-
 std::vector<GLfloat> load_GLfloat_list_from_json(json accessor, json JSON, std::vector<unsigned char> data) {
 	std::vector<GLfloat> positions;
 	unsigned int buff_view_ind = accessor.value("bufferView", 1);
@@ -709,9 +708,23 @@ void opengl::draw_model(eng::model model, eng::camera_radians camera) {
 				std::string dir_loc = "d_light_direction[" + ptr_prefix;
 				std::string col_loc = "d_light_color[" + ptr_prefix;
 				std::string pow_loc = "d_light_power[" + ptr_prefix;
-				opengl::uniform_load_vec3(dir_loc.c_str(), registry::objects::directional_lights.at(i)->direction, model.shader);
-				opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::directional_lights.at(i)->color, model.shader);
-				opengl::uniform_load_float(pow_loc.c_str(), registry::objects::directional_lights.at(i)->power, model.shader);
+					opengl::uniform_load_vec3(dir_loc.c_str(), registry::objects::directional_lights.at(i)->direction, model.shader);
+					opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::directional_lights.at(i)->color, model.shader);
+					opengl::uniform_load_float(pow_loc.c_str(), registry::objects::directional_lights.at(i)->power, model.shader);
+			}
+		}
+		for (int i = 0; i < registry::objects::point_lights.size(); i++) {
+			if (i < RENDER_SETTINGS.max_point_lights) {
+				std::string int_str = std::to_string(i);
+				std::string ptr_prefix = int_str + std::string("]");
+				std::string pos_loc = "p_light_position[" + ptr_prefix;
+				std::string col_loc = "p_light_color[" + ptr_prefix;
+				std::string pow_loc = "p_light_power[" + ptr_prefix;
+				std::string ran_loc = "p_light_range[" + ptr_prefix;
+					opengl::uniform_load_vec3(pos_loc.c_str(), registry::objects::point_lights.at(i)->position, model.shader);
+					opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::point_lights.at(i)->color, model.shader);
+					opengl::uniform_load_float(pow_loc.c_str(), registry::objects::point_lights.at(i)->power, model.shader);
+					opengl::uniform_load_float(ran_loc.c_str(), registry::objects::point_lights.at(i)->range, model.shader);
 			}
 		}
 			opengl::ex::vao_activate(model.vao);
@@ -746,6 +759,20 @@ void opengl::draw_model(eng::model* model, eng::camera_radians* camera) {
 				opengl::uniform_load_float(pow_loc.c_str(), registry::objects::directional_lights.at(i)->power, model->shader);
 			}
 		}
+		for (int i = 0; i < registry::objects::point_lights.size(); i++) {
+			if (i < RENDER_SETTINGS.max_point_lights) {
+				std::string int_str = std::to_string(i);
+				std::string ptr_prefix = int_str + std::string("]");
+				std::string pos_loc = "p_light_position[" + ptr_prefix;
+				std::string col_loc = "p_light_color[" + ptr_prefix;
+				std::string pow_loc = "p_light_power[" + ptr_prefix;
+				std::string ran_loc = "p_light_range[" + ptr_prefix;
+				opengl::uniform_load_vec3(pos_loc.c_str(), registry::objects::point_lights.at(i)->position, model->shader);
+				opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::point_lights.at(i)->color, model->shader);
+				opengl::uniform_load_float(pow_loc.c_str(), registry::objects::point_lights.at(i)->power, model->shader);
+				opengl::uniform_load_float(ran_loc.c_str(), registry::objects::point_lights.at(i)->range, model->shader);
+			}
+		}
 			opengl::ex::vao_activate(model->vao);
 				glDrawElements(GL_TRIANGLES, sizeof(model->mesh.indices) * model->mesh.indices.size(), GL_UNSIGNED_INT, 0);
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -776,6 +803,20 @@ void opengl::draw_model(eng::model model, eng::camera_locked camera) {
 					opengl::uniform_load_vec3(dir_loc.c_str(), registry::objects::directional_lights.at(i)->direction, model.shader);
 					opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::directional_lights.at(i)->color, model.shader);
 					opengl::uniform_load_float(pow_loc.c_str(), registry::objects::directional_lights.at(i)->power, model.shader);
+				}
+			}
+			for (int i = 0; i < registry::objects::point_lights.size(); i++) {
+				if (i < RENDER_SETTINGS.max_point_lights) {
+					std::string int_str = std::to_string(i);
+					std::string ptr_prefix = int_str + std::string("]");
+					std::string pos_loc = "p_light_position[" + ptr_prefix;
+					std::string col_loc = "p_light_color[" + ptr_prefix;
+					std::string pow_loc = "p_light_power[" + ptr_prefix;
+					std::string ran_loc = "p_light_range[" + ptr_prefix;
+					opengl::uniform_load_vec3(pos_loc.c_str(), registry::objects::point_lights.at(i)->position, model.shader);
+					opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::point_lights.at(i)->color, model.shader);
+					opengl::uniform_load_float(pow_loc.c_str(), registry::objects::point_lights.at(i)->power, model.shader);
+					opengl::uniform_load_float(ran_loc.c_str(), registry::objects::point_lights.at(i)->range, model.shader);
 				}
 			}
 				opengl::ex::vao_activate(model.vao);
@@ -810,10 +851,120 @@ void opengl::draw_model(eng::model* model, eng::camera_locked* camera) {
 					opengl::uniform_load_float(pow_loc.c_str(), registry::objects::directional_lights.at(i)->power, model->shader);
 				}
 			}
+			for (int i = 0; i < registry::objects::point_lights.size(); i++) {
+				if (i < RENDER_SETTINGS.max_point_lights) {
+					std::string int_str = std::to_string(i);
+					std::string ptr_prefix = int_str + std::string("]");
+					std::string pos_loc = "p_light_position[" + ptr_prefix;
+					std::string col_loc = "p_light_color[" + ptr_prefix;
+					std::string pow_loc = "p_light_power[" + ptr_prefix;
+					std::string ran_loc = "p_light_range[" + ptr_prefix;
+					opengl::uniform_load_vec3(pos_loc.c_str(), registry::objects::point_lights.at(i)->position, model->shader);
+					opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::point_lights.at(i)->color, model->shader);
+					opengl::uniform_load_float(pow_loc.c_str(), registry::objects::point_lights.at(i)->power, model->shader);
+					opengl::uniform_load_float(ran_loc.c_str(), registry::objects::point_lights.at(i)->range, model->shader);
+				}
+			}
 				opengl::ex::vao_activate(model->vao);
 					glDrawElements(GL_TRIANGLES, sizeof(model->mesh.indices) * model->mesh.indices.size(), GL_UNSIGNED_INT, 0);
 				glBindTexture(GL_TEXTURE_2D, 0);
 			opengl::ex::vao_terminate();
+	opengl::shader_terminate();
+}
+
+eng::debug_element opengl::create_debug_element(const char* mesh_fpath, bool wireframe, glm::vec3 draw_color, eng::transform transform) {
+	eng::mesh mesh = load_mesh_from_fpath_ptr(mesh_fpath);
+		std::vector<GLfloat>* positions = &mesh.positions;
+		std::vector<GLuint>* indices = &mesh.indices;
+		std::vector<GLfloat>* uvs = &mesh.uvs;
+		std::vector<GLfloat>* normals = &mesh.normals;
+	eng::debug_element result = eng::debug_element();
+		result.mesh = mesh;
+		result.transform = transform;
+		result.config.draw_color = draw_color;
+		result.config.wireframe = wireframe;
+		result.vao = load_vao_id(positions, indices, uvs, normals);
+		result.shader = load_shader_id("debug.vert", "debug.frag");
+	return result;
+}
+void opengl::create_debug_element(const char* mesh_fpath, bool wireframe, glm::vec3 draw_color, eng::transform transform, eng::debug_element* _address) {
+	eng::mesh mesh = load_mesh_from_fpath_ptr(mesh_fpath);
+		std::vector<GLfloat>* positions = &mesh.positions;
+		std::vector<GLuint>* indices = &mesh.indices;
+		std::vector<GLfloat>* uvs = &mesh.uvs;
+		std::vector<GLfloat>* normals = &mesh.normals;
+	eng::debug_element result = eng::debug_element();
+		result.mesh = mesh;
+		result.transform = transform;
+		result.config.draw_color = draw_color;
+		result.config.wireframe = wireframe;
+		result.vao = load_vao_id(positions, indices, uvs, normals);
+		result.shader = load_shader_id("debug.vert", "debug.frag");
+	*_address = result;
+}
+
+void opengl::draw_debug_element(eng::debug_element debug_element, eng::camera_radians camera) {
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	if (debug_element.config.wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		opengl::shader_activate(debug_element.shader);
+		opengl::uniform_load_mat4("model_matrix", gen_transform_matrix(debug_element.transform), debug_element.shader);
+		opengl::uniform_load_mat4("view_matrix", gen_view_matrix(camera), debug_element.shader);
+			opengl::uniform_load_mat4("projection_matrix", gen_projection_matrix(camera), debug_element.shader);
+			opengl::uniform_load_vec3("draw_color", debug_element.config.draw_color, debug_element.shader);
+			opengl::ex::vao_activate(debug_element.vao);
+				glDrawElements(GL_TRIANGLES, sizeof(debug_element.mesh.indices) * debug_element.mesh.indices.size(), GL_UNSIGNED_INT, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		opengl::ex::vao_terminate();
+	opengl::shader_terminate();
+}
+void opengl::draw_debug_element(eng::debug_element* debug_element, eng::camera_radians* camera) {
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	if (debug_element->config.wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		opengl::shader_activate(debug_element->shader);
+		opengl::uniform_load_mat4("model_matrix", gen_transform_matrix(debug_element->transform), debug_element->shader);
+		opengl::uniform_load_mat4("view_matrix", gen_view_matrix(camera), debug_element->shader);
+			opengl::uniform_load_mat4("projection_matrix", gen_projection_matrix(camera), debug_element->shader);
+			opengl::uniform_load_vec3("draw_color", debug_element->config.draw_color, debug_element->shader);
+			opengl::ex::vao_activate(debug_element->vao);
+				glDrawElements(GL_TRIANGLES, sizeof(debug_element->mesh.indices) * debug_element->mesh.indices.size(), GL_UNSIGNED_INT, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		opengl::ex::vao_terminate();
+	opengl::shader_terminate();
+}
+void opengl::draw_debug_element(eng::debug_element debug_element, eng::camera_locked camera) {
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	if (debug_element.config.wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	opengl::shader_activate(debug_element.shader);
+		opengl::uniform_load_mat4("model_matrix", gen_transform_matrix(debug_element.transform), debug_element.shader);
+		opengl::uniform_load_mat4("view_matrix", gen_view_matrix(camera), debug_element.shader);
+		opengl::uniform_load_mat4("projection_matrix", gen_projection_matrix(camera), debug_element.shader);
+			opengl::uniform_load_vec3("draw_color", debug_element.config.draw_color, debug_element.shader);
+			opengl::ex::vao_activate(debug_element.vao);
+				glDrawElements(GL_TRIANGLES, sizeof(debug_element.mesh.indices) * debug_element.mesh.indices.size(), GL_UNSIGNED_INT, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		opengl::ex::vao_terminate();
+	opengl::shader_terminate();
+}
+void opengl::draw_debug_element(eng::debug_element* debug_element, eng::camera_locked* camera) {
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	if (debug_element->config.wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	opengl::shader_activate(debug_element->shader);
+		opengl::uniform_load_mat4("model_matrix", gen_transform_matrix(debug_element->transform), debug_element->shader);
+		opengl::uniform_load_mat4("view_matrix", gen_view_matrix(camera), debug_element->shader);
+		opengl::uniform_load_mat4("projection_matrix", gen_projection_matrix(camera), debug_element->shader);
+			opengl::uniform_load_vec3("draw_color", debug_element->config.draw_color, debug_element->shader);
+			opengl::ex::vao_activate(debug_element->vao);
+				glDrawElements(GL_TRIANGLES, sizeof(debug_element->mesh.indices) * debug_element->mesh.indices.size(), GL_UNSIGNED_INT, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		opengl::ex::vao_terminate();
 	opengl::shader_terminate();
 }
 

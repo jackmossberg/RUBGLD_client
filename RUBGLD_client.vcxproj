@@ -156,6 +156,8 @@
     <ClInclude Include="std_data.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="debug.frag" />
+    <None Include="debug.vert" />
     <None Include="default.frag" />
     <None Include="default.vert" />
     <None Include="post.frag" />

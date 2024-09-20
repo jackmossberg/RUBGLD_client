@@ -42,8 +42,8 @@ namespace opengl {
 		float fog_amount = 0.075f;
 		glm::vec3 fog_color = glm::vec3(0.5f, 0.5f, 0.65f);
 		float ambient_light_power = 0.55f;
-		uint16_t max_directional_lights = 64;
-		uint16_t max_point_lights = 64;
+			uint16_t max_directional_lights = 64;
+			uint16_t max_point_lights = 64;
 	} RENDER_SETTINGS;
 	namespace skybox {
 		__declspec(selectany) struct RENDER_SETTINGS {
@@ -63,6 +63,14 @@ namespace opengl {
 		}
 	}
 	
+	namespace res {
+		__declspec(selectany) 
+		GLuint 
+			debug_shader, 
+			default_shader
+		;
+	}
+
 	namespace ex {
 		void compile_shader_err(GLuint id, const char* type);
 
@@ -120,11 +128,19 @@ namespace opengl {
 	eng::model create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform);
 		void create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, eng::transform transform, eng::model* _address);
 		void create_model(const char* mesh_fpath, const char* texture_fpath, float texture_scale, GLuint* shader, eng::transform transform, eng::model* _address);
-	
+
 	void draw_model(eng::model model, eng::camera_radians camera);
 	void draw_model(eng::model* model, eng::camera_radians* camera);
 		void draw_model(eng::model model, eng::camera_locked camera);
 		void draw_model(eng::model* model, eng::camera_locked* camera);
+
+	eng::debug_element create_debug_element(const char* mesh_fpath, bool wireframe, glm::vec3 draw_color, eng::transform transform);
+	void create_debug_element(const char* mesh_fpath, bool wireframe, glm::vec3 draw_color, eng::transform transform, eng::debug_element* _address);
+
+	void draw_debug_element(eng::debug_element debug_element, eng::camera_radians camera);
+	void draw_debug_element(eng::debug_element* debug_element, eng::camera_radians* camera);
+		void draw_debug_element(eng::debug_element debug_element, eng::camera_locked camera);
+		void draw_debug_element(eng::debug_element* debug_element, eng::camera_locked* camera);
 
 	eng::skybox create_skybox(const char* cubemap_fpath);
 	void create_skybox(const char* cubemap_fpath, eng::skybox* _address);
@@ -168,7 +184,6 @@ namespace opengl {
 			void bind_window();
 			void unbind_window();
 	}
-
 	void free();
 }
 
