@@ -7,8 +7,12 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
+#include<glm/vec3.hpp>
 #include<glm/glm.hpp>
+#include<glm/gtx/rotate_vector.hpp>
+#include<glm/gtx/vector_angle.hpp>
 #include<glm/gtc/matrix_transform.hpp>
+#include<glm/gtx/matrix_decompose.hpp>
 #include<glm/gtc/type_ptr.hpp>
 
 #include<stb/stb_image.h>
@@ -30,13 +34,6 @@
 
 using json = nlohmann::json;
 
-//bloom = 0.35f;
-//brightness = 1.25f;
-//render_scale = 7850.0f;
-//fog_amount = 0.075f;
-//fog_color = glm::vec3(0.5f, 0.5f, 0.65f);
-//ambient_light_power = 0.45f;
-
 namespace opengl {
 	__declspec(selectany) struct RENDER_SETTINGS {
 		float render_scale = 7850.0f;
@@ -44,7 +41,9 @@ namespace opengl {
 		float bloom = 0.35f;
 		float fog_amount = 0.075f;
 		glm::vec3 fog_color = glm::vec3(0.5f, 0.5f, 0.65f);
-		float ambient_light_power = 0.45f;
+		float ambient_light_power = 0.55f;
+		uint16_t max_directional_lights = 64;
+		uint16_t max_point_lights = 64;
 	} RENDER_SETTINGS;
 	namespace skybox {
 		__declspec(selectany) struct RENDER_SETTINGS {
@@ -57,7 +56,11 @@ namespace opengl {
 		__declspec(selectany) std::vector<GLuint> vaos;
 		__declspec(selectany) std::vector<GLuint> textures;
 		__declspec(selectany) std::vector<GLuint> shaders;
-		_declspec(selectany) std::vector<GLuint> framebuffers;
+		__declspec(selectany) std::vector<GLuint> framebuffers;
+		namespace objects {
+			__declspec(selectany) std::vector<eng::directional_light*> directional_lights;
+			__declspec(selectany) std::vector<eng::point_light*> point_lights;
+		}
 	}
 	
 	namespace ex {
@@ -76,6 +79,7 @@ namespace opengl {
 			void vao_terminate();
 			void vao_destroy(GLuint* id);
 		GLuint create_vao();
+		GLuint create_shader(const char* v_shader, const char* f_shader);
 	}
 	std::string parse_file_from_fpath_ptr(const char* fpath);
 	std::string parse_file_from_fpath_str(std::string fpath);
@@ -91,7 +95,6 @@ namespace opengl {
 		void uniform_load_vec2(const char* u_name, glm::vec2 target, GLuint shader);
 		void uniform_load_vec3(const char* u_name, glm::vec3 target, GLuint shader);
 		void uniform_load_mat4(const char* u_name, glm::mat4 target, GLuint shader);
-	GLuint create_shader(const char* v_shader, const char* f_shader);
 
 	void load_vao_id(std::vector<GLfloat>* positions, std::vector<GLuint>* indices, std::vector<GLfloat>* uvs, std::vector<GLfloat>* normals, GLuint* _address);
 	void load_tex_id(GLenum BANK, GLenum filter_t, const char* fpath, GLuint* _address);
@@ -129,6 +132,11 @@ namespace opengl {
 		void draw_skybox(eng::skybox* skybox, eng::camera_radians* camera);
 			void draw_skybox(eng::skybox skybox, eng::camera_locked camera);
 			void draw_skybox(eng::skybox* skybox, eng::camera_locked* camera);
+
+	void create_directional_light(glm::vec3 direction, glm::vec3 color, float power, eng::directional_light* _address);
+		void remove_directional_light(eng::directional_light* _address);
+	void create_point_light(glm::vec3 position, glm::vec3 color, float power, float range, eng::point_light* _address);
+		void remove_point_light(eng::point_light* _address);
 
 	namespace framebuffer {
 		eng::framebuffer_rgb load_framebuffer(uint16_t width, uint16_t height, GLuint* shader);

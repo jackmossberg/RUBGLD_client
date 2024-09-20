@@ -98,7 +98,7 @@ void opengl::ex::compile_shader_err(GLuint id, const char* type) {
 		}
 	}
 }
-GLuint opengl::create_shader(const char* v_shader, const char* f_shader) {
+GLuint opengl::ex::create_shader(const char* v_shader, const char* f_shader) {
 	GLuint id;
 	const char* f_source;
 	const char* v_source;
@@ -224,7 +224,7 @@ void opengl::load_tex_id(GLenum BANK, GLenum filter_t, const char* fpath, GLuint
 	glActiveTexture(0);
 }
 void opengl::load_shader_id(const char* v_shader, const char* f_shader, GLuint* _address) {
-	GLuint shader_id = create_shader(v_shader, f_shader);
+	GLuint shader_id = opengl::ex::create_shader(v_shader, f_shader);
 	shader_activate(shader_id); shader_terminate();
 	registry::shaders.push_back(shader_id);
 	*_address = shader_id;
@@ -278,7 +278,7 @@ GLuint opengl::load_tex_id(GLenum BANK, GLenum filter_t, const char* fpath) {
 	glActiveTexture(0);
 }
 GLuint opengl::load_shader_id(const char* v_shader, const char* f_shader) {
-	GLuint shader_id = create_shader(v_shader, f_shader);
+	GLuint shader_id = ex::create_shader(v_shader, f_shader);
 	shader_activate(shader_id); shader_terminate();
 	registry::shaders.push_back(shader_id);
 	return shader_id;
@@ -312,7 +312,6 @@ std::vector<GLfloat> load_GLfloat_list_from_json(json accessor, json JSON, std::
 	}
 	return positions;
 }
-
 std::vector<GLuint> load_GLuint_list_from_json(json accessor, json JSON, std::vector<unsigned char> data) {
 	std::vector<GLuint> indices;
 
@@ -380,7 +379,6 @@ eng::mesh opengl::load_mesh_from_fpath_ptr(const char* fpath) {
 	};
 	return result;
 }
-
 eng::mesh opengl::load_mesh_from_fpath_str(std::string fpath) {
 	std::string text = parse_file_from_fpath_str(fpath);
 	json JSON = json::parse(text);
@@ -704,13 +702,22 @@ void opengl::draw_model(eng::model model, eng::camera_radians camera) {
 			opengl::uniform_load_float("fog_amount", opengl::RENDER_SETTINGS.fog_amount, model.shader);
 			opengl::uniform_load_vec3("fog_color", opengl::RENDER_SETTINGS.fog_color, model.shader);
 			opengl::uniform_load_float("ambient_light_power", opengl::RENDER_SETTINGS.ambient_light_power, model.shader);
-			opengl::uniform_load_vec3("d_light_direction", glm::vec3(1.0f, 1.0f, 1.0f), model.shader);
-			opengl::uniform_load_vec3("d_light_color", glm::vec3(1.0f), model.shader);
-			opengl::uniform_load_float("d_light_power", 1.5f, model.shader);
-				opengl::ex::vao_activate(model.vao);
-					glDrawElements(GL_TRIANGLES, sizeof(model.mesh.indices) * model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			opengl::ex::vao_terminate();
+		for (int i = 0; i < registry::objects::directional_lights.size(); i++) {
+			if (i < RENDER_SETTINGS.max_directional_lights) {
+				std::string int_str = std::to_string(i);
+				std::string ptr_prefix = int_str + std::string("]");
+				std::string dir_loc = "d_light_direction[" + ptr_prefix;
+				std::string col_loc = "d_light_color[" + ptr_prefix;
+				std::string pow_loc = "d_light_power[" + ptr_prefix;
+				opengl::uniform_load_vec3(dir_loc.c_str(), registry::objects::directional_lights.at(i)->direction, model.shader);
+				opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::directional_lights.at(i)->color, model.shader);
+				opengl::uniform_load_float(pow_loc.c_str(), registry::objects::directional_lights.at(i)->power, model.shader);
+			}
+		}
+			opengl::ex::vao_activate(model.vao);
+				glDrawElements(GL_TRIANGLES, sizeof(model.mesh.indices) * model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		opengl::ex::vao_terminate();
 	opengl::shader_terminate();
 }
 void opengl::draw_model(eng::model* model, eng::camera_radians* camera) {
@@ -727,13 +734,22 @@ void opengl::draw_model(eng::model* model, eng::camera_radians* camera) {
 			opengl::uniform_load_float("fog_amount", opengl::RENDER_SETTINGS.fog_amount, model->shader);
 			opengl::uniform_load_vec3("fog_color", opengl::RENDER_SETTINGS.fog_color, model->shader);
 			opengl::uniform_load_float("ambient_light_power", opengl::RENDER_SETTINGS.ambient_light_power, model->shader);
-			opengl::uniform_load_vec3("d_light_direction", glm::vec3(1.0f, 1.0f, 1.0f), model->shader);
-			opengl::uniform_load_vec3("d_light_color", glm::vec3(1.0f), model->shader);
-			opengl::uniform_load_float("d_light_power", 1.5f, model->shader);
-				opengl::ex::vao_activate(model->vao);
-					glDrawElements(GL_TRIANGLES, sizeof(model->mesh.indices) * model->mesh.indices.size(), GL_UNSIGNED_INT, 0);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			opengl::ex::vao_terminate();
+		for (int i = 0; i < registry::objects::directional_lights.size(); i++) {
+			if (i < RENDER_SETTINGS.max_directional_lights) {
+				std::string int_str = std::to_string(i);
+				std::string ptr_prefix = int_str + std::string("]");
+				std::string dir_loc = "d_light_direction[" + ptr_prefix;
+				std::string col_loc = "d_light_color[" + ptr_prefix;
+				std::string pow_loc = "d_light_power[" + ptr_prefix;
+				opengl::uniform_load_vec3(dir_loc.c_str(), registry::objects::directional_lights.at(i)->direction, model->shader);
+				opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::directional_lights.at(i)->color, model->shader);
+				opengl::uniform_load_float(pow_loc.c_str(), registry::objects::directional_lights.at(i)->power, model->shader);
+			}
+		}
+			opengl::ex::vao_activate(model->vao);
+				glDrawElements(GL_TRIANGLES, sizeof(model->mesh.indices) * model->mesh.indices.size(), GL_UNSIGNED_INT, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		opengl::ex::vao_terminate();
 	opengl::shader_terminate();
 }
 void opengl::draw_model(eng::model model, eng::camera_locked camera) {
@@ -744,15 +760,24 @@ void opengl::draw_model(eng::model model, eng::camera_locked camera) {
 	opengl::shader_activate(model.shader);
 		opengl::uniform_load_mat4("model_matrix", gen_transform_matrix(model.transform), model.shader);
 		opengl::uniform_load_mat4("view_matrix", gen_view_matrix(camera), model.shader);
-			opengl::uniform_load_mat4("projection_matrix", gen_projection_matrix(camera), model.shader);
+		opengl::uniform_load_mat4("projection_matrix", gen_projection_matrix(camera), model.shader);
 			opengl::uniform_load_float("tex0_scale", model.texture_scale, model.shader);
 			opengl::uniform_load_texture_2D("tex0", model.texture, model.shader, GL_TEXTURE0);
 			opengl::uniform_load_float("fog_amount", opengl::RENDER_SETTINGS.fog_amount, model.shader);
 			opengl::uniform_load_vec3("fog_color", opengl::RENDER_SETTINGS.fog_color, model.shader);
 			opengl::uniform_load_float("ambient_light_power", opengl::RENDER_SETTINGS.ambient_light_power, model.shader);
-			opengl::uniform_load_vec3("d_light_direction", glm::vec3(1.0f, 1.0f, 1.0f), model.shader);
-			opengl::uniform_load_vec3("d_light_color", glm::vec3(1.0f), model.shader);
-			opengl::uniform_load_float("d_light_power", 1.5f, model.shader);
+			for (int i = 0; i < registry::objects::directional_lights.size(); i++) {
+				if (i < RENDER_SETTINGS.max_directional_lights) {
+					std::string int_str = std::to_string(i);
+					std::string ptr_prefix = int_str + std::string("]");
+					std::string dir_loc = "d_light_direction[" + ptr_prefix;
+					std::string col_loc = "d_light_color[" + ptr_prefix;
+					std::string pow_loc = "d_light_power[" + ptr_prefix;
+					opengl::uniform_load_vec3(dir_loc.c_str(), registry::objects::directional_lights.at(i)->direction, model.shader);
+					opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::directional_lights.at(i)->color, model.shader);
+					opengl::uniform_load_float(pow_loc.c_str(), registry::objects::directional_lights.at(i)->power, model.shader);
+				}
+			}
 				opengl::ex::vao_activate(model.vao);
 					glDrawElements(GL_TRIANGLES, sizeof(model.mesh.indices) * model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
 				glBindTexture(GL_TEXTURE_2D, 0);
@@ -773,14 +798,59 @@ void opengl::draw_model(eng::model* model, eng::camera_locked* camera) {
 			opengl::uniform_load_float("fog_amount", opengl::RENDER_SETTINGS.fog_amount, model->shader);
 			opengl::uniform_load_vec3("fog_color", opengl::RENDER_SETTINGS.fog_color, model->shader);
 			opengl::uniform_load_float("ambient_light_power", opengl::RENDER_SETTINGS.ambient_light_power, model->shader);
-			opengl::uniform_load_vec3("d_light_direction", glm::vec3(1.0f, 1.0f, 1.0f), model->shader);
-			opengl::uniform_load_vec3("d_light_color", glm::vec3(1.0f), model->shader);
-			opengl::uniform_load_float("d_light_power", 1.5f, model->shader);
+			for (int i = 0; i < registry::objects::directional_lights.size(); i++) {
+				if (i < RENDER_SETTINGS.max_directional_lights) {
+					std::string int_str = std::to_string(i);
+					std::string ptr_prefix = int_str + std::string("]");
+					std::string dir_loc = "d_light_direction[" + ptr_prefix;
+					std::string col_loc = "d_light_color[" + ptr_prefix;
+					std::string pow_loc = "d_light_power[" + ptr_prefix;
+					opengl::uniform_load_vec3(dir_loc.c_str(), registry::objects::directional_lights.at(i)->direction, model->shader);
+					opengl::uniform_load_vec3(col_loc.c_str(), registry::objects::directional_lights.at(i)->color, model->shader);
+					opengl::uniform_load_float(pow_loc.c_str(), registry::objects::directional_lights.at(i)->power, model->shader);
+				}
+			}
 				opengl::ex::vao_activate(model->vao);
 					glDrawElements(GL_TRIANGLES, sizeof(model->mesh.indices) * model->mesh.indices.size(), GL_UNSIGNED_INT, 0);
 				glBindTexture(GL_TEXTURE_2D, 0);
 			opengl::ex::vao_terminate();
 	opengl::shader_terminate();
+}
+
+void opengl::create_directional_light(glm::vec3 direction, glm::vec3 color, float power, eng::directional_light* _address) {
+		_address->direction = direction;
+		_address->color = color;
+		_address->power = power;
+	_address->registry._register = 1; // Tell the engine if this light data is being sent to the GPU...
+	registry::objects::directional_lights.push_back(_address);
+}
+void opengl::remove_directional_light(eng::directional_light* _address) {
+	if (_address->registry._register == 1) {
+		for (int i = 0; i < registry::objects::directional_lights.size(); i++) {
+			if (registry::objects::directional_lights.at(i) == _address) {
+				registry::objects::directional_lights.erase(registry::objects::directional_lights.begin() + (i - 1));
+			}
+		}
+	}
+	_address->registry._register = -1; // Tell the engine if this light data is being sent to the GPU...
+}
+void opengl::create_point_light(glm::vec3 position, glm::vec3 color, float power, float range, eng::point_light* _address) {
+		_address->position = position;
+		_address->color = color;
+		_address->power = power;
+		_address->range = range;
+	_address->registry._register = 1; // Tell the engine if this light data is being sent to the GPU...
+	registry::objects::point_lights.push_back(_address);
+}
+void opengl::remove_point_light(eng::point_light* _address) {
+	if (_address->registry._register == 1) {
+		for (int i = 0; i < registry::objects::point_lights.size(); i++) {
+			if (registry::objects::point_lights.at(i) == _address) {
+				registry::objects::point_lights.erase(registry::objects::point_lights.begin() + (i - 1));
+			}
+		}
+	}
+	_address->registry._register = -1; // Tell the engine if this light data is being sent to the GPU...
 }
 
 void opengl::window::start_window(uint16_t width, uint16_t height, const char* title, bool fullscreen) {
@@ -861,7 +931,6 @@ void opengl::window::end_window() {
 	) opengl::free();
 	glfwTerminate();
 }
-
 bool opengl::window::window_closed() {
 	if (data.main_window != NULL) return glfwWindowShouldClose(data.main_window);
 	else return true;
@@ -881,7 +950,6 @@ void opengl::window::bind_window() {
 	);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-
 void opengl::window::unbind_window() {
 	framebuffer::unbind_framebuffer_rgb();
 
@@ -1138,7 +1206,6 @@ void opengl::draw_skybox(eng::skybox* skybox, eng::camera_locked* camera) {
 	opengl::shader_terminate();
 }
 
-
 eng::framebuffer_rgb opengl::framebuffer::load_framebuffer(uint16_t width, uint16_t height, GLuint* shader) {
 	eng::framebuffer_rgb result = eng::framebuffer_rgb();
 	GLfloat _positions[18] = {
@@ -1199,7 +1266,6 @@ eng::framebuffer_rgb opengl::framebuffer::load_framebuffer(uint16_t width, uint1
 	opengl::registry::framebuffers.push_back(fbo);
 	return result;
 }
-
 void opengl::framebuffer::load_framebuffer(uint16_t width, uint16_t height, GLuint* shader, eng::framebuffer_rgb* _address) {
 	eng::framebuffer_rgb result = eng::framebuffer_rgb();
 	GLfloat _positions[18] = {
@@ -1260,7 +1326,6 @@ void opengl::framebuffer::load_framebuffer(uint16_t width, uint16_t height, GLui
 	opengl::registry::framebuffers.push_back(fbo);
 	*_address = result;
 }
-
 GLuint opengl::framebuffer::load_tex_from_framebuffer_rgb(const eng::framebuffer_rgb* t_framebuffer, const GLuint& color_attachment) {
 	glBindFramebuffer(GL_FRAMEBUFFER, t_framebuffer->id);
 	GLuint texture;
@@ -1284,14 +1349,12 @@ GLuint opengl::framebuffer::load_tex_from_framebuffer_rgb(const eng::framebuffer
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return texture;
 }
-
 void opengl::framebuffer::bind_framebuffer_rgb(const eng::framebuffer_rgb* t_framebuffer) {
 	glBindFramebuffer(GL_FRAMEBUFFER, t_framebuffer->id);
 }
 void opengl::framebuffer::unbind_framebuffer_rgb() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
 void opengl::framebuffer::draw_framebuffer(const eng::framebuffer_rgb* t_framebuffer, GLuint textures[]) {
 	opengl::shader_activate(t_framebuffer->shader);
 		opengl::uniform_load_texture_2D("tex0", t_framebuffer->output, t_framebuffer->shader, GL_TEXTURE0);
