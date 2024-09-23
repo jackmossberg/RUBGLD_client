@@ -25,6 +25,11 @@ namespace eng {
 		float fov;
 		float near_plane;
 		float far_plane;
+		bool isometric;
+		struct {
+			glm::vec3 target_position;
+			glm::vec3 target_rotation;
+		} data;
 	};
 
 	typedef struct camera_locked {
@@ -33,6 +38,10 @@ namespace eng {
 		float fov;
 		float near_plane;
 		float far_plane;
+		bool isometric;
+		struct {
+			glm::vec3 target_position;
+		} data;
 	};
 
 	typedef struct mesh {

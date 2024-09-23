@@ -2,6 +2,7 @@
 #define OPENGL_H
 
 #include"std_data.h"
+#include"std_input.h"
 
 #include<iostream>
 #include<glad/glad.h>
@@ -17,6 +18,9 @@
 
 #include<stb/stb_image.h>
 #include<json/json.h>
+
+#include<chrono>
+#include<thread>
 
 #include<algorithm>
 #include<unordered_map>
@@ -62,11 +66,11 @@ namespace opengl {
 			__declspec(selectany) std::vector<eng::point_light*> point_lights;
 		}
 	}
-	
+
 	namespace res {
-		__declspec(selectany) 
-		GLuint 
-			debug_shader, 
+		__declspec(selectany)
+			GLuint
+			debug_shader,
 			default_shader
 		;
 	}
@@ -89,6 +93,7 @@ namespace opengl {
 		GLuint create_vao();
 		GLuint create_shader(const char* v_shader, const char* f_shader);
 	}
+
 	std::string parse_file_from_fpath_ptr(const char* fpath);
 	std::string parse_file_from_fpath_str(std::string fpath);
 
@@ -184,6 +189,14 @@ namespace opengl {
 			void bind_window();
 			void unbind_window();
 	}
+
+	namespace camera {
+		void update_camera_free(eng::camera_radians camera, float delta_time);
+		void update_camera_free(eng::camera_radians* camera, float delta_time);
+		void update_camera_free(eng::camera_locked camera, float delta_time);
+		void update_camera_free(eng::camera_locked* camera, float delta_time);
+	}
+
 	void free();
 }
 

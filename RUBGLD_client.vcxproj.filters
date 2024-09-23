@@ -13,6 +13,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="Game Files">
+      <UniqueIdentifier>{98a3bf3b-cfd0-4820-a15d-33d0e3f478d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -28,12 +31,18 @@
     <ClCompile Include="std_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="program.cpp">
+      <Filter>Game Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="opengl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="std_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="program.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

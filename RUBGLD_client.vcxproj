@@ -148,11 +148,13 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="opengl.cpp" />
+    <ClCompile Include="program.cpp" />
     <ClCompile Include="stb.cpp" />
     <ClCompile Include="std_data.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="opengl.h" />
+    <ClInclude Include="program.h" />
     <ClInclude Include="std_data.h" />
   </ItemGroup>
   <ItemGroup>
