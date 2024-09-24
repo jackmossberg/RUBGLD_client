@@ -34,6 +34,9 @@
     <ClCompile Include="program.cpp">
       <Filter>Game Files</Filter>
     </ClCompile>
+    <ClCompile Include="std_input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="opengl.h">
@@ -43,6 +46,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="program.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="std_input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

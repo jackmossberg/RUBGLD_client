@@ -151,11 +151,13 @@
     <ClCompile Include="program.cpp" />
     <ClCompile Include="stb.cpp" />
     <ClCompile Include="std_data.cpp" />
+    <ClCompile Include="std_input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="opengl.h" />
     <ClInclude Include="program.h" />
     <ClInclude Include="std_data.h" />
+    <ClInclude Include="std_input.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="debug.frag" />

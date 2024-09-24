@@ -18,23 +18,17 @@ eng::point_light point_light_3;
 
 void start(app* sys) {
 	_camera = opengl::create_camera_locked(glm::vec3(15.0f, -15.0f, -15.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	_camera.fov = 15.0f;
+	_camera.fov = 95.0f;
 	_camera.far_plane = 1500.0f;
 	_camera.near_plane = 0.01f;
-	_camera.isometric = true;
+	//_camera.isometric = true;
 
-	_skybox = opengl::create_skybox("res/eng/skybox_1");
+	_skybox = opengl::create_skybox("res/eng/skybox_3");
 
 	_model = opengl::create_model("res/eng/BOX.gltf", "res/eng/UV_TEST.png", 3.5f, &opengl::res::default_shader, eng::transform{ NULL, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.3f) });
 
 	uint16_t terrain_size = 150;
-	_terrain = opengl::generate_plane("res/eng/UV_TEST.png", 25.5f, &opengl::res::default_shader, eng::transform{ NULL, glm::vec3(-terrain_size / 2, -5.0f, -terrain_size / 2) }, 0.0f, 15.0f, terrain_size);
-
-	opengl::RENDER_SETTINGS.ambient_light_power = 0.0f;
-	opengl::RENDER_SETTINGS.fog_amount = 0.013f;
-	opengl::RENDER_SETTINGS.bloom = 0.45f;
-
-	opengl::RENDER_SETTINGS.fog_color = glm::vec3(0.0f);
+	_terrain = opengl::generate_plane("res/eng/UV_TEST.png", 25.5f, &opengl::res::default_shader, eng::transform{ NULL, glm::vec3(-terrain_size / 2, -5.0f, -terrain_size / 2) }, 14.0f, 15.0f, terrain_size);
 
 	_sun; opengl::create_directional_light(glm::vec3(45.0f, 45.0f, 45.0f), glm::vec3(1.0f, 1.0f, 1.05f), 1.05f, &_sun);
 

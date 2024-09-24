@@ -1728,6 +1728,49 @@ void opengl::camera::update_camera_free(eng::camera_radians* camera, float delta
 void opengl::camera::update_camera_free(eng::camera_locked camera, float delta_time) {
 	camera.position = eng::vec3_lerp(camera.position, camera.data.target_position, 14.0f * delta_time);
 }
+
+glm::vec2 mouse_delta = glm::vec2(0.0f);
+glm::vec3 orientation_radians = glm::vec3(0.0f);
 void opengl::camera::update_camera_free(eng::camera_locked* camera, float delta_time) {
+	glm::vec3 input_vector = glm::vec3(0.0f);
+	{
+		if (input::on_key(opengl::window::data.main_window, GLFW_KEY_W) && !input::on_key(opengl::window::data.main_window, GLFW_KEY_S))
+			input_vector.z = 1;
+		else if (!input::on_key(opengl::window::data.main_window, GLFW_KEY_W) && !input::on_key(opengl::window::data.main_window, GLFW_KEY_S))
+			input_vector.z = 0;
+		else if (!input::on_key(opengl::window::data.main_window, GLFW_KEY_W) && input::on_key(opengl::window::data.main_window, GLFW_KEY_S))
+			input_vector.z = -1;
+
+		if (input::on_key(opengl::window::data.main_window, GLFW_KEY_A) && !input::on_key(opengl::window::data.main_window, GLFW_KEY_D))
+			input_vector.x = 1;
+		else if (!input::on_key(opengl::window::data.main_window, GLFW_KEY_A) && !input::on_key(opengl::window::data.main_window, GLFW_KEY_D))
+			input_vector.x = 0;
+		else if (!input::on_key(opengl::window::data.main_window, GLFW_KEY_A) && input::on_key(opengl::window::data.main_window, GLFW_KEY_D))
+			input_vector.x = -1;
+
+		if (input::on_key(opengl::window::data.main_window, GLFW_KEY_E) && !input::on_key(opengl::window::data.main_window, GLFW_KEY_Q))
+			input_vector.y = 1;
+		else if (!input::on_key(opengl::window::data.main_window, GLFW_KEY_E) && !input::on_key(opengl::window::data.main_window, GLFW_KEY_Q))
+			input_vector.y = 0;
+		else if (!input::on_key(opengl::window::data.main_window, GLFW_KEY_E) && input::on_key(opengl::window::data.main_window, GLFW_KEY_Q))
+			input_vector.y = -1;
+	}
+
+	camera->data.target_position -= glm::rotateY(glm::vec3((input_vector.x * 15.0f) * delta_time, (input_vector.y * 15.0f) * delta_time, (input_vector.z * 15.0f) * delta_time), glm::radians(mouse_delta.x));
 	camera->position = eng::vec3_lerp(camera->position, camera->data.target_position, 14.0f * delta_time);
+	
+	glfwSetInputMode(opengl::window::data.main_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+	glm::vec3 orientation = glm::vec3(0.0f, 0.0f, 1.0f);
+	if (!input::on_key(opengl::window::data.main_window, GLFW_KEY_TAB)) {
+		glfwSetInputMode(opengl::window::data.main_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+		mouse_delta -= input::mouse_delta(opengl::window::data.main_window) * delta_time * 85.0f;
+		
+		orientation = glm::rotateX(orientation, glm::radians(-mouse_delta.y));
+		orientation_radians = glm::rotateY(orientation, glm::radians(mouse_delta.x));
+
+		mouse_delta.y = glm::clamp(mouse_delta.y, -85.0f, 85.0f);
+	}
+	camera->look_target = orientation_radians - glm::vec3(camera->position.x, camera->position.y, camera->position.z);
 }

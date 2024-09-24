@@ -36,8 +36,9 @@ namespace input {
 	bool on_key(GLFWwindow* window, int key_code);
 	bool on_key_pressed(GLFWwindow* window, int key_code);
 	bool on_key_released(GLFWwindow* window, int key_code);
-	bool on_key_just_pressed(GLFWwindow* window, int key_code);
-	bool on_key_just_released(GLFWwindow* window, int key_code);
+
+	glm::vec2 mouse_delta(GLFWwindow* window);
+	glm::vec2 mouse_position(GLFWwindow* window);
 }
 
 #endif // !STD_INPUT_H
